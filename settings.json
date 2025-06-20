@@ -1,0 +1,5 @@
+{
+    "python.pythonPath": "C:/Users/mdelr/anaconda3/envs/science_research_310/python.exe",
+    "terminal.integrated.env.osx": {"PYTHONPATH": "${workspaceFolder}"},
+    "editor.FontLigatures": false
+}
