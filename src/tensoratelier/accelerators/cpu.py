@@ -1,17 +1,20 @@
 from typing import Union
-from tensoratelier.accelerators.accelerator import Accelerator
 
 import torch
 from typing_extensions import override
 
-class CPUAccelerator(Accelerator):
+from tensoratelier.accelerators import BaseAccelerator, _register_accelerator
+
+
+@_register_accelerator("cpu")
+class CPUAccelerator(BaseAccelerator):
     """Accelerator for CPU devices."""
 
     @override
     def setup_device(self, device: torch.device) -> None:
-       if device.type != "cpu":
-           raise ValueError(f"Device should be CPU, got {device} instead.") 
-    
+        if device.type != "cpu":
+            raise ValueError(f"Device should be CPU, got {device} instead.")
+
     @override
     def teardown(self) -> None:
         pass
@@ -20,7 +23,7 @@ class CPUAccelerator(Accelerator):
     @override
     def parse_devices(devices: Union[int, str]) -> int:
         return _parse_cpu_cores(devices)
-    
+
     @staticmethod
     @override
     def get_parallel_devices(devices: Union[int, str]) -> list[torch.device]:
@@ -41,8 +44,10 @@ class CPUAccelerator(Accelerator):
 def _parse_cpu_cores(cpu_cores: Union[int, str]) -> int:
     if isinstance(cpu_cores, str) and cpu_cores.strip().isdigit():
         cpu_cores = int(cpu_cores)
-    
-    if not isinstance(cpu_cores, int) or cpu_cores<=0:
-        raise TypeError("'devices' selected with 'CPUAccelerator' should be an int > 0.")
-    
+
+    if not isinstance(cpu_cores, int) or cpu_cores <= 0:
+        raise TypeError(
+            "'devices' selected with 'CPUAccelerator' should be an int > 0."
+        )
+
     return cpu_cores
