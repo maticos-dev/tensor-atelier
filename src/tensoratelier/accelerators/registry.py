@@ -1,33 +1,38 @@
-from typing import Dict, Type, Union
+from typing import Type, Union
 
 import torch
 
 from tensoratelier.accelerators import BaseAccelerator
 
-_ACCELERATOR_REGISTRY: Dict[str, Type[BaseAccelerator]] = {}
 
+class _AcceleratorRegistry:
+    def __init__(self):
+        self._registry = {}
 
-def _register_accelerator(accelerator_type: str):
-    def wrapper(cls: Type[BaseAccelerator]):
-        if accelerator_type in _ACCELERATOR_REGISTRY:
-            raise ValueError("Accelerator 'name' already registered.")
+    def _register(self, accelerator_type: str):
+        def wrapper(cls: Type[BaseAccelerator]):
+            if accelerator_type in self._registry:
+                raise ValueError("Accelerator 'name' already registered.")
 
-        _ACCELERATOR_REGISTRY[accelerator_type] = cls
+            self._registry[accelerator_type] = cls
 
-    return wrapper
+        return wrapper
 
-
-def _get_accelerator(accelerator_type: Union[str, torch.device]) -> BaseAccelerator:
-    key = (
-        accelerator_type.type.lower()
-        if isinstance(accelerator_type, torch.device)
-        else accelerator_type.lower()
-    )
-
-    try:
-        return _ACCELERATOR_REGISTRY[key]()
-    except KeyError:
-        raise ValueError(
-            f"Unsupported accelerator '{
-                key}'. Only 'cpu' is supported at this time."
+    def _get(self, accelerator_type: Union[str, torch.device]) -> BaseAccelerator:
+        key = (
+            accelerator_type.type.lower()
+            if isinstance(accelerator_type, torch.device)
+            else accelerator_type.lower()
         )
+
+        try:
+            return self._registry[key]()
+        except KeyError:
+            raise ValueError(
+                f"Unsupported accelerator '{
+                    key
+                }'. Only 'cpu' is supported at this time."
+            )
+
+
+ACCELERATOR_REGISTRY = _AcceleratorRegistry()

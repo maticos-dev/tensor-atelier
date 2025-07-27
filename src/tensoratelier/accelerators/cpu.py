@@ -3,10 +3,10 @@ from typing import Union
 import torch
 from typing_extensions import override
 
-from tensoratelier.accelerators import BaseAccelerator, _register_accelerator
+from tensoratelier.accelerators import ACCELERATOR_REGISTRY, BaseAccelerator
 
 
-@_register_accelerator("cpu")
+@ACCELERATOR_REGISTRY._register_accelerator("cpu")
 class CPUAccelerator(BaseAccelerator):
     """Accelerator for CPU devices."""
 
