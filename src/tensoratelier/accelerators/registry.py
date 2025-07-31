@@ -7,31 +7,37 @@ from tensoratelier.accelerators import BaseAccelerator
 
 class _AcceleratorRegistry:
     def __init__(self):
-        self._registry = {}
+        self._registry: dict[str, dict[str, type]] = {}
 
-    def _register(self, accelerator_type: str):
+    def _register(self, accelerator_name: str, variant: str = "default"):
+        assert type in ("gpu", "tpu", "cpu")
+
         def wrapper(cls: Type[BaseAccelerator]):
-            if accelerator_type in self._registry:
+            if accelerator_name.lower() in self._registry:
                 raise ValueError("Accelerator 'name' already registered.")
-
-            self._registry[accelerator_type] = cls
+            self._registry[accelerator_name] = {}
+            self._registry[accelerator_name][variant] = cls
 
         return wrapper
 
-    def _get(self, accelerator_type: Union[str, torch.device]) -> BaseAccelerator:
-        key = (
-            accelerator_type.type.lower()
-            if isinstance(accelerator_type, torch.device)
-            else accelerator_type.lower()
+    def _get(
+        self, accelerator_name: Union[str, torch.device], variant: str = "default"
+    ) -> BaseAccelerator:
+        name = (
+            accelerator_name.type.lower()
+            if isinstance(accelerator_name, torch.device)
+            else accelerator_name.lower()
         )
 
         try:
-            return self._registry[key]()
+            if variant not in self._registry[name]:
+                raise ValueError(
+                    f"Unsupported variant '{variant}' for accelerator '{name}'."
+                )
+            return self._registry[name][variant]()
         except KeyError:
             raise ValueError(
-                f"Unsupported accelerator '{
-                    key
-                }'. Only 'cpu' is supported at this time."
+                f"Unsupported accelerator '{name}'. Only 'cpu' is supported at this time."
             )
 
 
