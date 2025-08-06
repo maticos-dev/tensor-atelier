@@ -1,3 +1,4 @@
+import inspect
 from functools import wraps
 from typing import Union
 
@@ -20,8 +21,16 @@ class _DeviceLoaderHandler:
 
 
 def auto_move_dataloader(func):
+    sig = inspect.signature(func)
+
     @wraps(func)
-    def wrapped(self, train_loader, validation_loader, *args, **kwargs):
+    def wrapped(self, *args, **kwargs):
+        bound = sig.bind(*args, **kwargs)
+        bound.apply_defaults()
+
+        train_loader = list(bound.arguments.keys())["train_loader"]
+        validation_loader = list(bound.arguments.keys())["validation_loader"]
+
         train_loader = _DeviceLoaderHandler(
             dataloader=train_loader, accelerator=self.accelerator
         )
