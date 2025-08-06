@@ -5,6 +5,7 @@ import torch
 from tensoratelier.core import AtelierModule
 from tensoratelier.core.connectors import AcceleratorHandler
 from tensoratelier.core.connectors.utils import auto_move_dataloader, auto_move_model
+from tensoratelier.loops import _FitLoop, _TrainingEpochLoop
 from tensoratelier.utils.parsing import _wrap_args
 
 
@@ -21,25 +22,23 @@ class AtelierTrainer:
 
     @auto_move_dataloader
     @auto_move_model
-    def fit(self, model: AtelierModule, train_loader, validation_loader) -> None:
+    def fit(
+        self, model: AtelierModule, train_loader, validation_loader, max_epochs: int = 0
+    ) -> None:
         # NB: some kind of type checking for train_loader, validation_loader, and model.
         # here error out the test script to see how these calls are made.
+
+        self.model = model
+        self.init_fit_loop(train_loader, max_epochs)
 
         optimizer = model.configure_optimizers()
         self.validate_optimizer(optimizer)
 
-        for epoch in range(self.max_epochs):
-            model.train()
-            for batch in train_loader:
-                loss = model.train_step(batch)
-
-                self.backprop_and_reset_grads(loss, optimizer)
-
-            model.eval()
-            with torch.no_grad():
-                for batch in validation_loader:
-                    batch = [x.to(self.device) for x in batch]
-                    model.validation_step(batch)
+        model.eval()
+        with torch.no_grad():
+            for batch in validation_loader:
+                batch = [x.to(self.device) for x in batch]
+                model.validation_step(batch)
 
     def backprop_and_reset_grads(self, loss, optimizer):
         """
@@ -59,3 +58,16 @@ class AtelierTrainer:
             optimizer.step()
             optimizer.zero_grad()
             loss.backward()
+
+    def init_fit_loop(self, train_loader, max_epochs):
+        self.fit_loop = _FitLoop(self, train_loader, max_epochs)
+        self.fit_loop.epoch_loop = _TrainingEpochLoop()
+
+    @property
+    def lightning_module(self):
+        if hasattr(self, "model") and self.model is not None:
+            return self.model
+        else:
+            raise AttributeError(
+                f"No model associated with trainer instance {self.__class__.__qualname__}."
+            )
