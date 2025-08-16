@@ -1,10 +1,12 @@
-from typing import Type, Union
+from typing import Type, Union, TYPE_CHECKING
 
 import torch
 
 from tensoratelier.accelerators import BaseAccelerator
 from tensoratelier.accelerators.registry import ACCELERATOR_REGISTRY
-from tensoratelier.core import AtelierModule
+
+if TYPE_CHECKING:
+    from tensoratelier.core import AtelierModule
 
 
 class AcceleratorHandler:
@@ -22,7 +24,7 @@ class AcceleratorHandler:
     def _move_batch(self, batch):
         return batch.to(self._device)
 
-    def _move_model(self, model: AtelierModule):
+    def _move_model(self, model):
         model.to(self._accelerator_flag)
 
     def _check_accelerator_flag(accelerator: Union[str, torch.device]):
@@ -30,7 +32,8 @@ class AcceleratorHandler:
 
         if not accelerator_cls:
             raise ValueError(
-                f"You selected an invalid accelerator name: 'accelerator={accelerator!r}'. Available names are: auto, {', '.join(ACCELERATOR_REGISTRY)}."
+                f"You selected an invalid accelerator name: 'accelerator={
+                    accelerator!r}'. Available names are: auto, {', '.join(ACCELERATOR_REGISTRY)}."
             )
 
     def _auto_select_accelerator():

@@ -1,23 +1,32 @@
+import logging
 from contextlib import contextmanager
 from typing import override
 
 from tensoratelier.profilers import BaseProfiler
 
+log = logging.getLogger(__name__)
+
 
 class _FittingProfiler(BaseProfiler):
-    @override
-    def start(self, fitting_mode: str):
-        if fitting_mode.lower() in ("train", "validate"):
-            return fitting_mode
+    fitting_mode: str = "NO MODE SELECTED"
+    fitting_epoch: int
 
-        raise KeyError("Dataloader mode must be either 'train' or 'validate'")
+    @override
+    def start(self):
+        log.debug(f"INITIATED [{self.fitting_mode.upper()}]; [{self.fitting_epoch}]")
+
+    @override
+    def stop(self):
+        log.debug(f"COMPLETED [{self.fitting_mode.upper()}]; [{self.fitting_epoch}]")
 
     @override
     @contextmanager
-    def profile(self, fitting_mode):
+    def profile(self, fitting_mode: str, fitting_epoch: int):
+        self.fitting_mode = fitting_mode
+        self.fitting_epoch = fitting_epoch
+
         try:
-            self._mode = self.start(fitting_mode)
+            self.start(fitting_mode)
             yield
-        except KeyError:
-            pass
-            # call debug log.
+        finally:
+            self.stop(fitting_mode)

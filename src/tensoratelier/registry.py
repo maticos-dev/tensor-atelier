@@ -1,2 +1,1 @@
-from accelerators.registry import ACCELERATOR_REGISTRY
-from strategies.registry import STRATEGY_REGISTRY
+from tensoratelier.accelerators.registry import ACCELERATOR_REGISTRY

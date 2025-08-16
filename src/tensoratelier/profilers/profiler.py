@@ -5,11 +5,11 @@ from contextlib import contextmanager
 
 class BaseProfiler(ABC):
     @abstractmethod
-    def start(self, action_name: str) -> None:
+    def start(self, action_name: str = "") -> None:
         pass
 
     @abstractmethod
-    def stop(self, action_name: str) -> None:
+    def stop(self, action_name: str = "") -> None:
         pass
 
     @contextmanager

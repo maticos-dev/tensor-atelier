@@ -10,7 +10,7 @@ class _AcceleratorRegistry:
         self._registry: dict[str, dict[str, type]] = {}
 
     def _register(self, accelerator_name: str, variant: str = "default"):
-        assert type in ("gpu", "tpu", "cpu")
+        assert accelerator_name in ("gpu", "tpu", "cpu")
 
         def wrapper(cls: Type[BaseAccelerator]):
             if accelerator_name.lower() in self._registry:
@@ -32,12 +32,14 @@ class _AcceleratorRegistry:
         try:
             if variant not in self._registry[name]:
                 raise ValueError(
-                    f"Unsupported variant '{variant}' for accelerator '{name}'."
+                    f"Unsupported variant '{
+                        variant}' for accelerator '{name}'."
                 )
             return self._registry[name][variant]()
         except KeyError:
             raise ValueError(
-                f"Unsupported accelerator '{name}'. Only 'cpu' is supported at this time."
+                f"Unsupported accelerator '{
+                    name}'. Only 'cpu' is supported at this time."
             )
 
 
