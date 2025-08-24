@@ -10,8 +10,8 @@ def auto_move_dataloader(func):
 
         # self is trainer instance
         converted_dataloader = AtelierDataLoader(
-            self,
             kwargs["dataloader"],
+            self,
             kwargs["train_val_split"],
             kwargs["device"]
         )

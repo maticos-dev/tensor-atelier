@@ -101,9 +101,9 @@ class AtelierTrainer:
                 }"
             )
 
+        loss.backward()
         self.atelier_optimizer.step()
         self.atelier_optimizer.zero_grad()
-        loss.backward()
 
     def zero_grad_step(self, optimizer):
         # if atelier_module linked and implements this,
@@ -136,7 +136,7 @@ class AtelierTrainer:
 
     @property
     def train_profiler(self) -> BaseProfiler:
-        if getattr(self, "_profiler", False):
+        if not hasattr(self, "_train_profiler"):
             raise AttributeError(
                 "No training profiler linked to trainer object."
             )
@@ -156,7 +156,7 @@ class AtelierTrainer:
 
     @property
     def optimization_profiler(self) -> BaseProfiler:
-        if getattr(self, "_profiler", False):
+        if not hasattr(self, "_optim_profiler"):
             raise AttributeError(
                 "No optimization profiler linked to trainer object.")
         return self._optim_profiler
