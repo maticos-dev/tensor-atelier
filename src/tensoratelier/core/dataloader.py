@@ -24,6 +24,7 @@ class AtelierDataLoader:
         self.user_dataloader = dataloader
         self._device = device
         self._mode = "train"
+        self.batch_idx = 0
         self.train_ds, self.val_ds = self._split_dataloader_into_subsets(
             self.user_dataloader.dataset, lengths
         )

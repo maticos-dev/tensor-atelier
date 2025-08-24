@@ -1,38 +1,24 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Union
 
 import torch
 
 
 class BaseAccelerator(ABC):
-    """
-    Accelerator base class. Defines abstract functionality for dealing with one type of hardware.
-    """
+    def __init__(self):
+        pass
 
     @abstractmethod
-    def setup_device(self, device: torch.device) -> None:
-        """Create and prep. device for current process"""
+    def setup(self, model: torch.nn.Module) -> torch.nn.Module:
+        """Setup the model for this accelerator."""
+        pass
 
     @abstractmethod
     def teardown(self) -> None:
-        """Cleanup any state created by the accelerator"""
+        """Teardown the accelerator."""
+        pass
 
-    @staticmethod
-    @abstractmethod
-    def parse_devices(devices: Any) -> Any:
-        """Accelerator device parsing logic"""
 
-    @staticmethod
-    @abstractmethod
-    def get_parallel_devices(devices: Any) -> Any:
-        """Get parallel devices for the Accelerator"""
-
-    @staticmethod
-    @abstractmethod
-    def auto_device_count() -> int:
-        """Get the device count when set to auto."""
-
-    @staticmethod
-    @abstractmethod
-    def is_available() -> bool:
-        """Detect if the hardware is available."""
+class Accelerator(BaseAccelerator):
+    def __init__(self):
+        super().__init__()

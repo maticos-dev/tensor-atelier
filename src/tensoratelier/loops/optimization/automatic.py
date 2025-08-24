@@ -87,8 +87,7 @@ class _AutomaticOptimization:
     def _make_step_fn(self) -> _ClosureResult:
         loss: Tensor = self.trainer.training_step()
         if not isinstance(loss, Tensor):
-            log.error(f"Loss returned from AtelierModule training_step of type {
-                      type(loss)}, expected torch.Tensor")
+            log.error(f"Loss returned from AtelierModule training_step of type {type(loss)}, expected torch.Tensor")
             raise TypeError(
                 "AtelierModule.training_step must return loss as type torch.Tensor")
         return _ClosureResult(loss=loss)
