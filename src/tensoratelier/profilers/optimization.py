@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import override
+from typing_extensions import override
 
 from tensoratelier.profilers import BaseProfiler
 
@@ -14,17 +14,15 @@ class _OptimizationProfiler(BaseProfiler):
     @override
     def start(self):
         log.debug(
-            f"OPTIM INITIALIZING [{self.optimization_policy.upper()}]; STEP [{
-                self.optimization_step
-            }]"
+            f"OPTIM INITIALIZING [{self.optimization_policy.upper()}]; "
+     	    f"STEP [{self.optimization_step}]"
         )
 
     @override
     def stop(self):
         log.debug(
-            f"OPTIM COMPLETED [{self.optimization_policy.upper()}]; STEP [{
-                self.optimization_step
-            }]"
+            f"OPTIM COMPLETED [{self.optimization_policy.upper()}];"
+	    f"STEP [{self.optimization_step}]"
         )
 
     @override

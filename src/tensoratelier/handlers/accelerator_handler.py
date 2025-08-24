@@ -30,9 +30,12 @@ class AcceleratorHandler:
         return batch.to(self._accelerator)
 
     def _move_model(self, model):
-        # need to move to torch.device,
-        #
-        model.to(self._accelerator)
+        # Move model to the appropriate device
+        if self._accelerator_flag == "auto":
+            device = "cpu"  # Default to CPU for auto
+        else:
+            device = self._accelerator_flag
+        model.to(device)
 
     def _auto_select_accelerator(self):
         if torch.cuda.is_available() and "cuda" in ACCELERATOR_REGISTRY:

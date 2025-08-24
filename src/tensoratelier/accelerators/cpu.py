@@ -14,6 +14,11 @@ class CPUAccelerator(BaseAccelerator):
     """Accelerator for CPU devices."""
 
     @override
+    def setup(self, model: torch.nn.Module) -> torch.nn.Module:
+        """Setup the model for CPU."""
+        return model.to("cpu")
+
+    @override
     def setup_device(self, device: torch.device) -> None:
         if device.type != "cpu":
             raise ValueError(f"Device should be CPU, got {device} instead.")

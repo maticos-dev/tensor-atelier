@@ -1,7 +1,5 @@
 from functools import wraps
 
-from tensoratelier.core import AtelierDataLoader
-
 
 def auto_move_dataloader(func):
 
@@ -9,9 +7,12 @@ def auto_move_dataloader(func):
     def wrapped(self, **kwargs):
 
         # self is trainer instance
+        # Import here to avoid circular imports
+        from tensoratelier.core import AtelierDataLoader
+        
         converted_dataloader = AtelierDataLoader(
-            kwargs["dataloader"],
             self,
+            kwargs["dataloader"],
             kwargs["train_val_split"],
             kwargs["device"]
         )

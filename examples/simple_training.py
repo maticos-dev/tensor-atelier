@@ -13,7 +13,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from tensoratelier import AtelierModule, AtelierTrainer
-from tensoratelier.profilers import BaseProfiler
+from tensoratelier.profilers import _FittingProfiler
 
 
 class SimpleLinearModel(AtelierModule):
@@ -68,7 +68,6 @@ def main():
     trainer = AtelierTrainer(
         max_epochs=5,
         accelerator="cpu",
-        profiler=BaseProfiler()
     )
     
     # Train the model

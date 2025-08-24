@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from typing import Self
+from typing_extensions import Self
 
 
 @dataclass

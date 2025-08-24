@@ -18,13 +18,14 @@ if TYPE_CHECKING:
 @dataclass
 class _ClosureResult:
     loss: Optional[Tensor] = field(init=True, default=None)
+    loss_no_grad: Optional[Tensor] = field(init=True, default=None)
 
     def __post_init__(self) -> None:
         self._clone_loss()
 
     def _clone_loss(self) -> None:
         if self.loss is not None:
-            self.loss = self.loss.detach().clone()
+            self.loss_no_grad = self.loss.detach().clone()
 
 
 class Closure:
