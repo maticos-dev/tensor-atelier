@@ -1,0 +1,1 @@
+from tensoratelier.accelerators.registry import ACCELERATOR_REGISTRY
