@@ -26,7 +26,7 @@ class AtelierModule(Module, ABC):
         self._trainer: Optional[AtelierTrainer] = None
         self._metric_attributes: Optional[dict[int, str]] = None
         self._automatic_optimization: bool = True
-        self._optimizer: Optimizer
+        self._optimizer: Optional[Optimizer] = None
 
     @abstractmethod
     def training_step(self, batch, batch_idx) -> Tensor:
@@ -54,9 +54,7 @@ class AtelierModule(Module, ABC):
     def trainer(self) -> AtelierTrainer:
         if self._trainer is None:
             raise RuntimeError(
-                f"{self.__class__.__qualname__} is not attached to a {
-                    AtelierTrainer.__name__
-                }."
+                f"{self.__class__.__qualname__} is not attached to a {AtelierTrainer.__name__}."
             )
         return self._trainer
 

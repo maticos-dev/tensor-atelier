@@ -2,7 +2,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from tensoratelier.loops import _TrainingEpochLoop, _ValidationLoop
+# Import directly to avoid circular imports
+from .training_epoch_loop import _TrainingEpochLoop
+from .validation_loop import _ValidationLoop
 from tensoratelier.loops.progress import _EpochProgress
 
 if TYPE_CHECKING:
@@ -27,7 +29,7 @@ class _FitLoop:
 
         self.max_epochs = max_epochs
         self.epoch_loop = _TrainingEpochLoop(trainer, 10)
-        self.val_loop = _ValidationLoop()
+        self.val_loop = _ValidationLoop(trainer)
 
         self._epoch_progress = _EpochProgress()
 

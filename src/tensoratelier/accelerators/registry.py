@@ -32,14 +32,14 @@ class _AcceleratorRegistry:
         try:
             if variant not in self._registry[name]:
                 raise ValueError(
-                    f"Unsupported variant '{
-                        variant}' for accelerator '{name}'."
+                    "Unsupported variant "
+                    f"'{variant}' for accelerator '{name}'."
                 )
             return self._registry[name][variant]()
         except KeyError:
             raise ValueError(
-                f"Unsupported accelerator '{
-                    name}'. Only 'cpu' is supported at this time."
+                f"Unsupported accelerator '{ name}'. "
+		"Only 'cpu' is supported at this time."
             )
 
 

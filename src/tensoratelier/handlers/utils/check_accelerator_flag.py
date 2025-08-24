@@ -7,13 +7,12 @@ def check_accelerator_flag(func):
     @wraps(func)
     def wrapped(self, **kwargs):
 
-        accelerator_cls = ACCELERATOR_REGISTRY._get(kwargs["accelerator"])
+        accelerator_cls = ACCELERATOR_REGISTRY._get(kwargs["accelerator_flag"])
 
         if not accelerator_cls:
             raise ValueError(
-                "You selected an invalid accelerator name: 'accelerator="
-                f"{kwargs["accelerator"]!r}'. Available names are: auto,"
-                f"{', '.join(ACCELERATOR_REGISTRY._registry.keys())}."
+                f"You selected an invalid accelerator name: 'accelerator_flag={kwargs['accelerator_flag']}'. "
+                f"Available names are: auto, {', '.join(ACCELERATOR_REGISTRY._registry.keys())}."
             )
 
         return func(self, **kwargs)

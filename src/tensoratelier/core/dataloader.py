@@ -37,11 +37,19 @@ class AtelierDataLoader:
     def _split_dataloader_into_subsets(self,
                                        dataset,
                                        lengths) -> Tuple[Subset, Subset]:
-        # return generator with seed if user has set one.
-        gen_args = self._configure_generator()
+        # Convert proportions to actual lengths if needed
+        if isinstance(lengths, (list, tuple)) and all(isinstance(x, (int, float)) for x in lengths):
+            if any(isinstance(x, float) for x in lengths):
+                # Convert proportions to integers
+                total_length = len(dataset)
+                train_length = int(lengths[0] * total_length)
+                val_length = total_length - train_length
+                lengths = [train_length, val_length]
+                # print(f"Dataset split: total={total_length}, train={train_length}, val={val_length}")
 
-        train_dataset, validation_dataset = random_split(
-            dataset, lengths, **gen_args)
+        # print(f"Using lengths: {lengths}")
+        # For now, use random_split without generator to avoid potential issues
+        train_dataset, validation_dataset = random_split(dataset, lengths)
 
         return train_dataset, validation_dataset
 
@@ -60,6 +68,18 @@ class AtelierDataLoader:
         for key in valid_keys:
             if hasattr(dataloader, key):
                 kwargs[key] = getattr(dataloader, key)
+        
+        # Remove batch_sampler if present to avoid conflicts with batch_size, shuffle, etc.
+        if 'batch_sampler' in kwargs:
+            del kwargs['batch_sampler']
+        
+        # Remove sampler if present to avoid conflicts with dataset size
+        if 'sampler' in kwargs:
+            del kwargs['sampler']
+        
+        # Debug: print the extracted kwargs
+        # print(f"Extracted DataLoader kwargs: {kwargs}")
+            
         return kwargs
 
     def _clone_dataloader(self, dataset: Union[Dataset, Subset]):
@@ -81,10 +101,14 @@ class AtelierDataLoader:
         dataset = self.train_dl if self._mode == "train" else self.val_dl
 
         self._check_if_trainer_linked()
-        with self._trainer.train_profiler.profile(self._mode):
+        with self._trainer.train_profiler.profile(self._mode, self.batch_idx):
             for batch in dataset:
                 self.batch_idx += 1
-                yield batch.to(self._device)
+                # Move each tensor in the batch to the device
+                if isinstance(batch, (list, tuple)):
+                    yield [item.to(self._device) if hasattr(item, 'to') else item for item in batch]
+                else:
+                    yield batch.to(self._device) if hasattr(batch, 'to') else batch
 
     def __next__(self):
         if not hasattr(self, '_iterator'):
@@ -111,12 +135,14 @@ class AtelierDataLoader:
         return self._trainer
 
     @trainer.setter
-    def trainer(self, trainer: AtelierTrainer):
+    def trainer(self, trainer):
+        # Import here to avoid circular imports
+        from tensoratelier.core import AtelierTrainer
+        
         if isinstance(trainer, AtelierTrainer):
             self._trainer = trainer
         else:
             raise AttributeError(
-                f"Expected trainer to be instance of {
-                    AtelierTrainer.__qualname__
-                } but got {trainer.__class__.__qualname__} object."
+                f"Expected trainer to be instance of {AtelierTrainer.__qualname__} "
+                f"but got {trainer.__class__.__qualname__} object."
             )

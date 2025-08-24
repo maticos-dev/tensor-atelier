@@ -1,6 +1,6 @@
 import logging
 from contextlib import contextmanager
-from typing import override
+from typing_extensions import override
 
 from tensoratelier.profilers import BaseProfiler
 
@@ -14,7 +14,8 @@ class _FittingProfiler(BaseProfiler):
     @override
     def start(self):
         log.debug(
-            f"INITIATED [{self.fitting_mode.upper()}]; [{self.fitting_epoch}]")
+            f"INITIATED [{self.fitting_mode.upper()}]; [{self.fitting_epoch}]"
+	)
 
     @override
     def stop(self):

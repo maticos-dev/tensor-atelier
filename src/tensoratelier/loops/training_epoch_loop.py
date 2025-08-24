@@ -14,7 +14,8 @@ class _TrainingEpochLoop(_StatefulBase):
             trainer, self.trainer.atelier_optimizer
         )
 
-        self._epoch_progress = self.trainer.epoch_progress
+        # Don't access epoch_progress here to avoid circular dependency
+        self._epoch_progress = None
         self._optim_progress = _OptimizationProgress()
         self._batch_progress = _BatchProgress()
 
@@ -25,7 +26,7 @@ class _TrainingEpochLoop(_StatefulBase):
         batch progress.
         """
 
-        epoch_idx = self._epoch_progress.epoch_idx
+        epoch_idx = self.epoch_progress.epoch_idx
 
         self._update_current_state(epoch_idx, batch_idx=0)
 
@@ -76,6 +77,12 @@ class _TrainingEpochLoop(_StatefulBase):
     @property
     def _global_step(self) -> int:
         return self._optim_progress.step_idx
+
+    @property
+    def epoch_progress(self):
+        if self._epoch_progress is None:
+            self._epoch_progress = self.trainer.epoch_progress
+        return self._epoch_progress
 
     @property
     def done(self) -> bool:
