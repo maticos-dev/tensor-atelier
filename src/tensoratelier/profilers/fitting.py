@@ -1,35 +1,27 @@
 import logging
 from contextlib import contextmanager
+from typing import Any
 from typing_extensions import override
 
-from tensoratelier.profilers import BaseProfiler
+from tensoratelier.profilers import BaseProfiler, ProfilerContext
 
 log = logging.getLogger(__name__)
 
 
-class _FittingProfiler(BaseProfiler):
-    fitting_mode: str = "NO MODE SELECTED"
-    fitting_epoch: int
+class _DefaultFittingProfiler(BaseProfiler):
 
     @override
-    def start(self):
+    def start(self, desc: str, **kwargs: Any):
         log.debug(
-            f"INITIATED [{self.fitting_mode.upper()}]; [{self.fitting_epoch}]"
-	)
+            f"INITIATED [{desc.upper()}]; [{self.epoch_idx}]"
+        )
 
     @override
-    def stop(self):
+    def stop(self, desc: str, **kwargs: Any):
         log.debug(
-            f"COMPLETED [{self.fitting_mode.upper()}]; [{self.fitting_epoch}]")
+            f"COMPLETED [{desc.upper()}]; [{self.epoch_idx}]")
 
     @override
-    @contextmanager
-    def profile(self, policy: str, idx: int):
-        self.fitting_mode = policy
-        self.fitting_epoch = idx
-
-        try:
-            self.start()
-            yield
-        finally:
-            self.stop()
+    def profile(self, desc: str, epoch_idx):
+        self.epoch_idx = epoch_idx
+        return ProfilerContext(self, desc, epoch_idx)

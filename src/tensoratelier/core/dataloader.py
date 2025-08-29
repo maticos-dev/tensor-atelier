@@ -68,18 +68,18 @@ class AtelierDataLoader:
         for key in valid_keys:
             if hasattr(dataloader, key):
                 kwargs[key] = getattr(dataloader, key)
-        
+
         # Remove batch_sampler if present to avoid conflicts with batch_size, shuffle, etc.
         if 'batch_sampler' in kwargs:
             del kwargs['batch_sampler']
-        
+
         # Remove sampler if present to avoid conflicts with dataset size
         if 'sampler' in kwargs:
             del kwargs['sampler']
-        
+
         # Debug: print the extracted kwargs
         # print(f"Extracted DataLoader kwargs: {kwargs}")
-            
+
         return kwargs
 
     def _clone_dataloader(self, dataset: Union[Dataset, Subset]):
@@ -138,11 +138,12 @@ class AtelierDataLoader:
     def trainer(self, trainer):
         # Import here to avoid circular imports
         from tensoratelier.core import AtelierTrainer
-        
+
         if isinstance(trainer, AtelierTrainer):
             self._trainer = trainer
         else:
             raise AttributeError(
-                f"Expected trainer to be instance of {AtelierTrainer.__qualname__} "
+                f"Expected trainer to be instance of {
+                    AtelierTrainer.__qualname__} "
                 f"but got {trainer.__class__.__qualname__} object."
             )

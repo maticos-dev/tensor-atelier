@@ -22,6 +22,7 @@ Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
 Classifier: Topic :: Software Development :: Libraries :: Python Modules
 Requires-Python: >=3.8
 Description-Content-Type: text/markdown
+License-File: LICENSE
 Requires-Dist: torch>=1.12.0
 Requires-Dist: numpy>=1.21.0
 Provides-Extra: dev
@@ -31,6 +32,7 @@ Requires-Dist: black>=22.0.0; extra == "dev"
 Requires-Dist: isort>=5.0.0; extra == "dev"
 Requires-Dist: flake8>=5.0.0; extra == "dev"
 Requires-Dist: mypy>=0.991; extra == "dev"
+Dynamic: license-file
 
 # Tensor Atelier
 

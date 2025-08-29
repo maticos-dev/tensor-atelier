@@ -12,7 +12,7 @@ from torch import Tensor
 from tensoratelier.loops import _FitLoop, _TrainingEpochLoop
 from tensoratelier.profilers import (
     BaseProfiler,
-    _FittingProfiler,
+    _DefaultFittingProfiler,
     _OptimizationProfiler,
 )
 from tensoratelier.utils.parsing import _wrap_args
@@ -30,12 +30,14 @@ class AtelierTrainer:
         *,
         max_epochs: int = 10,
         accelerator: Union[str, torch.device],
+        profiler: BaseProfiler = _DefaultFittingProfiler()
     ) -> None:
         self.max_epochs = max_epochs
         # Import here to avoid circular imports
         from tensoratelier.handlers import AcceleratorHandler
         self._accelerator_handler = AcceleratorHandler(accelerator)
-        self._profiler = _FittingProfiler()  # TODO MAKE THIS PROPERTY
+        self.train_profiler = profiler  # uninstantiated class
+        self.optim_profiler = _OptimizationProfiler()
 
     @_wrap_args
     def fit(
@@ -48,7 +50,7 @@ class AtelierTrainer:
     ) -> None:
         # Import here to avoid circular imports
         from tensoratelier.core import AtelierDataLoader
-        
+
         # Move model to device and set to training mode
         if module is not None:
             self._accelerator_handler._move_model(module)
@@ -72,32 +74,33 @@ class AtelierTrainer:
         # Configure optimizer after model is moved to device
         optimizer = self.module.configure_optimizers()
         self.validate_optimizer(optimizer)
-        
+
         # Attach optimizer to the module
         self.module._optimizer = optimizer
-        
+
         # Debug: check if model parameters have requires_grad
-        print(f"Model parameters require_grad: {next(self.module.parameters()).requires_grad}")
+        print(f"Model parameters require_grad: {
+              next(self.module.parameters()).requires_grad}")
         print(f"Model device: {next(self.module.parameters()).device}")
         print(f"Optimizer param groups: {len(optimizer.param_groups)}")
 
-        self._train_profiler = _FittingProfiler()
-        self._optim_profiler = _OptimizationProfiler()
-
         # initialize and run fit loop.
+        print("initialized")
         self.init_fit_loop(dataloader, self.max_epochs)
         self.fit_loop.run()
 
     def attach_trainer_to_dataloader(self, dataloader: AtelierDataLoader):
         log.debug(
-            f"Attached {self.__class__.__qualname__} to {dataloader.__class__.__qualname__}"
+            f"Attached {self.__class__.__qualname__} to {
+                dataloader.__class__.__qualname__}"
         )
 
         dataloader.trainer = self
 
     def init_fit_loop(self, train_loader, max_epochs):
         log.debug(
-            f"Initialized fit and nested epoch loops for {self.__class__.__qualname__}"
+            f"Initialized fit and nested epoch loops for {
+                self.__class__.__qualname__}"
         )
 
         self.fit_loop = _FitLoop(
@@ -109,7 +112,7 @@ class AtelierTrainer:
                 isinstance(optimizer, AtelierOptimizer))
 
     def training_step(self) -> Tensor:  # called by automatic optimization.
-        with self.train_profiler.profile("Executing module training step",
+        with self.train_profiler.profile("TRAIN",
                                          self.fit_loop._epoch_progress.epoch_idx):
             batch_idx = self.fit_loop.epoch_loop._batch_progress.batch_idx
             batch = self.dataloader.forward()
@@ -118,7 +121,8 @@ class AtelierTrainer:
     def optimizer_step(self, loss: Tensor):
         if not isinstance(self.atelier_optimizer, torch.optim.Optimizer):
             raise TypeError(
-                f"Expected type 'torch.optim.optimizer' but got {self.atelier_optimizer.__class__.__name__}"
+                f"Expected type 'torch.optim.optimizer' but got {
+                    self.atelier_optimizer.__class__.__name__}"
             )
 
         loss.backward()
@@ -144,7 +148,8 @@ class AtelierTrainer:
             return self.module
         else:
             raise AttributeError(
-                f"No module associated with trainer instance {self.__class__.__qualname__}."
+                f"No module associated with trainer instance {
+                    self.__class__.__qualname__}."
             )
 
     @property
@@ -164,12 +169,13 @@ class AtelierTrainer:
     def train_profiler(self, profiler_obj: BaseProfiler) -> None:
         if not isinstance(profiler_obj, BaseProfiler):
             raise TypeError(
-                f"Expected profiler instance to be of type BaseProfiler, but got {profiler_obj.__class__.__qualname__}"
+                f"Expected profiler instance to be of type BaseProfiler, but got {
+                    profiler_obj.__class__.__qualname__}"
             )
 
         log.debug(f"Attached {profiler_obj.__class__.__qualname__} to trainer")
 
-        self._train_profiler = profiler_obj
+        self._train_profiler = profiler_obj  # instantiate
 
     @property
     def optimization_profiler(self) -> BaseProfiler:
@@ -183,7 +189,8 @@ class AtelierTrainer:
                               ) -> Optional[BaseProfiler]:
         if not isinstance(profiler_obj, BaseProfiler):
             raise TypeError(
-                f"Expected profiler instance to be of type BaseProfiler, but got {profiler_obj.__class__.__qualname__}"
+                f"Expected profiler instance to be of type BaseProfiler, but got {
+                    profiler_obj.__class__.__qualname__}"
             )
 
         log.debug(f"Attached {profiler_obj.__class__.__qualname__} to trainer")

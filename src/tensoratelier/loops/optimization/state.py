@@ -1,6 +1,7 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 from abc import ABC
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional
 
 if TYPE_CHECKING:
     from tensoratelier.core import AtelierTrainer
