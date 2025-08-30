@@ -14,7 +14,7 @@ class _TrainingEpochLoop(_StatefulBase):
             trainer, self.trainer.atelier_optimizer
         )
 
-        self.epoch_progress = self.trainer.epoch_progress
+        self._epoch_progress = self.trainer.epoch_progress
         self._optim_progress = _OptimizationProgress()
         self._batch_progress = _BatchProgress()
 

@@ -38,6 +38,7 @@ class AtelierTrainer:
         self._accelerator_handler = AcceleratorHandler(accelerator)
         self.train_profiler = profiler  # uninstantiated class
         self.optim_profiler = _OptimizationProfiler()
+        self.fit_loop = None
 
     @_wrap_args
     def fit(
@@ -105,6 +106,7 @@ class AtelierTrainer:
 
         self.fit_loop = _FitLoop(
             self, self.atelier_module, train_loader, max_epochs)
+        print(self.fit_loop)
         self.fit_loop.epoch_loop = _TrainingEpochLoop(self, max_epochs)
 
     def validate_optimizer(self, optimizer) -> bool:
