@@ -1,189 +1,187 @@
-# Tensor Atelier
+<div align="center">
+  <img src="logo.svg" alt="Tensor Atelier Logo" width="120" height="120">
+  
+  # Tensor Atelier
+  
+  *A minimalist PyTorch training framework with automatic optimization and profiling*
+  
+  [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+  [![PyTorch](https://img.shields.io/badge/PyTorch-1.12+-red.svg)](https://pytorch.org/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+</div>
 
-A PyTorch training framework with automatic optimization and profiling capabilities.
+---
 
-## Features
+## 🎯 What is Tensor Atelier?
 
-- **Automatic Optimization**: Handles gradient computation, optimization steps, and learning rate scheduling automatically
-- **Profiling**: Built-in profiling for training and optimization steps
-- **Accelerator Support**: Support for different hardware accelerators (CPU, GPU, etc.)
-- **Flexible Training Loops**: Customizable training and validation loops
-- **DataLoader Integration**: Enhanced DataLoader with automatic device placement and train/validation splitting
+Tensor Atelier is a clean, modular PyTorch training framework designed for developers who want powerful ML capabilities without the complexity. Built with automatic optimization, built-in profiling, and a flexible architecture that grows with your needs.
 
-## Installation
+## ✨ Key Features
 
-```bash
-pip install tensor-atelier
-```
+- **🔄 Automatic Optimization** - Handles gradients, optimization steps, and scheduling automatically
+- **📊 Built-in Profiling** - Monitor training performance with custom profiler support  
+- **⚡ Multi-Accelerator** - CPU, GPU, and custom accelerator support
+- **🧩 Modular Design** - Clean separation of concerns with extensible components
+- **📦 Smart DataLoader** - Automatic device placement and train/validation splitting
+- **🎨 Type Safe** - Full type hints and mypy support
 
-Or install from source:
-
-```bash
-git clone https://github.com/tensor-atelier/tensor-atelier.git
-cd tensor-atelier
-pip install -e .
-```
-
-## Quick Start
+## 🚀 Quick Start
 
 ```python
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 from tensoratelier import AtelierModule, AtelierTrainer
-from tensoratelier.profilers import BaseProfiler
 
 # Define your model
 class MyModel(AtelierModule):
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(10, 1)
-    
+        self.loss_fn = nn.MSELoss()
+
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self.linear(x)
-        loss = nn.functional.mse_loss(y_hat, y)
-        return loss
-    
+        return self.loss_fn(y_hat, y)
+
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=0.001)
 
-# Create data
-x = torch.randn(100, 10)
-y = torch.randn(100, 1)
-dataset = TensorDataset(x, y)
-dataloader = DataLoader(dataset, batch_size=32)
+# Create data and trainer
+x, y = torch.randn(1000, 10), torch.randn(1000, 1)
+dataloader = DataLoader(TensorDataset(x, y), batch_size=32)
 
-# Create trainer
-trainer = AtelierTrainer(
-    max_epochs=10,
-    accelerator="cpu",
-    profiler=BaseProfiler()
-)
-
-# Train
-model = MyModel()
-trainer.fit(model, dataloader)
+trainer = AtelierTrainer(max_epochs=10, accelerator="cpu")
+trainer.fit(MyModel(), dataloader)
 ```
 
-## Core Components
+## 🏗️ Architecture
 
-### AtelierModule
+### Core Components
 
-The base class for all models. Inherit from this to create your training models:
-
+**AtelierModule** - Your model base class
 ```python
 class MyModel(AtelierModule):
     def training_step(self, batch, batch_idx):
-        # Define your training step
-        pass
+        # Define your training logic
+        return loss
     
     def configure_optimizers(self):
-        # Return your optimizer(s)
-        pass
+        # Return your optimizer
+        return torch.optim.Adam(self.parameters())
 ```
 
-### AtelierTrainer
-
-The main training orchestrator:
-
+**AtelierTrainer** - Training orchestrator
 ```python
 trainer = AtelierTrainer(
     max_epochs=10,
-    accelerator="cpu",  # or "cuda", "mps", etc.
-    profiler=BaseProfiler()
+    accelerator="cpu",  # or "cuda", "mps"
+    profiler=BaseProfiler()  # optional
 )
 ```
 
-### AtelierDataLoader
-
-Enhanced DataLoader with automatic device placement and train/validation splitting:
-
+**AtelierDataLoader** - Enhanced data loading
 ```python
+# Automatic device placement and train/val splitting
 dataloader = AtelierDataLoader(
     original_dataloader,
     trainer,
-    lengths=[0.8, 0.2],  # 80% train, 20% validation
+    lengths=[0.8, 0.2],  # 80% train, 20% val
     device="cpu"
 )
 ```
 
-## Advanced Usage
+### Profiling System
 
-### Custom Profilers
-
-Create custom profilers by inheriting from `BaseProfiler`:
+Create custom profilers to monitor your training:
 
 ```python
 from tensoratelier.profilers import BaseProfiler
+import time
 
-class MyProfiler(BaseProfiler):
-    def profile(self, name, *args, **kwargs):
-        # Custom profiling logic
-        pass
-```
-
-### Custom Accelerators
-
-Implement custom accelerators by inheriting from `BaseAccelerator`:
-
-```python
-from tensoratelier.accelerators import BaseAccelerator
-
-class MyAccelerator(BaseAccelerator):
-    def setup(self, model):
-        # Setup logic
-        return model
+class TimeProfiler(BaseProfiler):
+    def start(self, desc, **kwargs):
+        self._active_profiles[desc] = time.perf_counter()
     
-    def teardown(self):
-        # Cleanup logic
-        pass
+    def stop(self, desc, context, **kwargs):
+        elapsed = time.perf_counter() - self._active_profiles[desc]
+        print(f"{desc}: {elapsed:.4f}s")
+
+# Use it
+trainer = AtelierTrainer(
+    max_epochs=10, 
+    accelerator="cpu", 
+    profiler=TimeProfiler()
+)
 ```
 
-## Development
-
-### Setup Development Environment
+## 📦 Installation
 
 ```bash
+# From source (recommended for development)
 git clone https://github.com/tensor-atelier/tensor-atelier.git
 cd tensor-atelier
+pip install -e .
+
+# With development dependencies
 pip install -e ".[dev]"
 ```
 
-### Running Tests
+## 📚 Examples
+
+- **[Basic Training](examples/simple_training.py)** - Simple linear model training
+- **[Custom Profiler](examples/custom_profiler.py)** - Implementing a custom profiler
+
+## 🛠️ Development
 
 ```bash
+# Run tests
 pytest
-```
 
-### Code Formatting
-
-```bash
+# Format code
 black src/
 isort src/
-```
 
-### Type Checking
-
-```bash
+# Type checking
 mypy src/
+
+# Linting
+flake8 src/
 ```
 
-## Contributing
+## 🎨 Design Philosophy
+
+- **Simplicity** - Minimal boilerplate for common tasks
+- **Modularity** - Pluggable components for extensibility  
+- **Performance** - Efficient training loops with profiling
+- **Type Safety** - Full type hints for better development experience
+
+## 🔮 Roadmap
+
+- [ ] Validation loop support
+- [ ] Model checkpointing
+- [ ] Learning rate scheduling
+- [ ] Multi-GPU support
+- [ ] Distributed training
+- [ ] CLI interface
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) or:
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+4. Add tests
+5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
-## Acknowledgments
+---
 
-- Inspired by PyTorch Lightning
-- Built on top of PyTorch
-- Community contributions welcome
+<div align="center">
+  <strong>Built with ❤️ for the PyTorch community</strong>
+</div>

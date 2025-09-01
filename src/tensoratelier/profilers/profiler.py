@@ -8,13 +8,13 @@ class BaseProfiler(ABC):
     """All user implementations of profilers.
     Must make user of this"""
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, **config: Any):
         """Initialize profiler with custom kwargs.
 
         Args:
             **kwargs: User-defined configuration options.
         """
-        self.config = kwargs
+        self.config = config
         self._active_profiles: Dict[str, Any] = {}
 
     @abstractmethod
@@ -25,10 +25,10 @@ class BaseProfiler(ABC):
     def stop(self, desc: str, context: Any, **kwargs: Any) -> None:
         pass
 
-    def profile(self, desc: str):
+    def profile(self, desc: str, **kwargs):
         # atelier doesnt worry about passing kwargs.
         # they are saved in baseprofiler at instantiation.
-        return ProfilerContext(self, desc, **self.config)
+        return ProfilerContext(self, desc, **kwargs)
 
     def get_stats(self) -> Dict[str, Any]:
         return {}
@@ -41,9 +41,12 @@ class ProfilerContext:
 
     def __init__(self, profiler: BaseProfiler,
                  desc: str, **kwargs: Any):
-        self.profiler = profiler
-        self.desc = desc
+
+        assert(isinstance(profiler, BaseProfiler))
+        self.profiler = profiler 
+
         self.kwargs = kwargs
+        self.desc = desc
         self.context = None
 
     def __enter__(self):

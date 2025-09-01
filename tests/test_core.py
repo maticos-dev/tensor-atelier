@@ -4,7 +4,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from tensoratelier.core import AtelierModule, AtelierTrainer, AtelierDataLoader, AtelierOptimizer
-from tensoratelier.profilers import BaseProfiler
 
 
 class SimpleModel(AtelierModule):
@@ -59,7 +58,6 @@ class TestAtelierTrainer:
         trainer = AtelierTrainer(
             max_epochs=10,
             accelerator="cpu",
-            profiler=BaseProfiler()
         )
         assert trainer.max_epochs == 10
     
@@ -67,15 +65,12 @@ class TestAtelierTrainer:
         trainer = AtelierTrainer(
             max_epochs=10,
             accelerator="cpu",
-            profiler=BaseProfiler()
         )
         
-        # Test with valid optimizer
         model = SimpleModel()
         optimizer = model.configure_optimizers()
         assert trainer.validate_optimizer(optimizer)
         
-        # Test with AtelierOptimizer
         atelier_optimizer = AtelierOptimizer(optimizer)
         assert trainer.validate_optimizer(atelier_optimizer)
 
@@ -92,7 +87,6 @@ class TestAtelierDataLoader:
         trainer = AtelierTrainer(
             max_epochs=10,
             accelerator="cpu",
-            profiler=BaseProfiler()
         )
         
         # Create AtelierDataLoader

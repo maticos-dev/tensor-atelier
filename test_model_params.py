@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
 from tensoratelier import AtelierModule, AtelierTrainer
-from tensoratelier.profilers import _FittingProfiler
+from tensoratelier.profilers import _DefaultFittingProfiler
 
 
 class SimpleLinearModel(AtelierModule):

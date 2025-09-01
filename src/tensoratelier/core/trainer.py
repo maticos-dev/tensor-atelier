@@ -102,7 +102,6 @@ class AtelierTrainer:
         )
 
         self.fit_loop = _FitLoop(self, self.atelier_module, train_loader, max_epochs)
-        print(self.fit_loop)
         self.fit_loop.epoch_loop = _TrainingEpochLoop(self, max_epochs)
 
     def validate_optimizer(self, optimizer) -> bool:
@@ -111,7 +110,8 @@ class AtelierTrainer:
         )
 
     def training_step(self) -> Tensor:  # called by automatic optimization.
-        with self.train_profiler.profile("TRAIN"):
+        epoch_idx = self.fit_loop._epoch_progress.epoch_idx
+        with self.train_profiler.profile("TRAIN", epoch_idx=epoch_idx):
             batch_idx = self.fit_loop.epoch_loop._batch_progress.batch_idx
             batch = self.dataloader.forward()
             return self.atelier_module.training_step(batch, batch_idx)

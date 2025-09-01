@@ -8,22 +8,13 @@ from torch import Tensor
 from tensoratelier.mixins import AttributeOverrideMixin
 
 if TYPE_CHECKING:
-    from tensoratelier.core import AtelierOptimizer, AtelierTrainer
+    from tensoratelier.core import AtelierTrainer
 
+Module.call_super_init = True
 
-class ModulePrereqs(ABC):
-    @abstractmethod
-    def training_step(self):
-        pass
-
-    @abstractmethod
-    def configure_optimizers(self):
-        pass
-
-
-class AtelierModule(AttributeOverrideMixin, Module, ABC):
+class AtelierModule(Module, AttributeOverrideMixin, ABC):
     def __init__(self, *args: Any, **kwargs: Any):
-        super(AtelierModule, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._trainer: Optional[AtelierTrainer] = None
         self._metric_attributes: Optional[dict[int, str]] = None
         self._automatic_optimization: bool = True
