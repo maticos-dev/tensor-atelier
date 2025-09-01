@@ -32,6 +32,18 @@ class AtelierModule(Module, AttributeOverrideMixin, ABC):
             Training loss or dict containing loss and other metrics
         """
 
+    def validation_step(self, batch, batch_idx: int = 0) -> Optional[Tensor]:
+        """Defines a single validation step.
+
+        Args:
+            batch: The validation batch data
+            batch_idx: Index of the current batch
+
+        Returns:
+            Validation loss or None if not implemented
+        """
+        return None
+
     @abstractmethod
     def configure_optimizers(self) -> Optimizer:
         """Configure and return the optimizer(s) for training.

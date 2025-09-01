@@ -48,12 +48,12 @@ class _FitLoop:
     def advance(self):
         log.debug("Initializing fit loop")
 
+        # Run training epoch
         self.epoch_loop.run(self.data_source)
 
-        # need mechanism to change the data source
-        # from the training to the validation segment.
-
-        # self.val_loop.run(self, self.atelier_module, self.data_source)
+        # Run validation epoch if validation data is available
+        if hasattr(self.data_source, 'val_dl') and self.data_source.val_dl is not None:
+            self.val_loop.run(self.atelier_module, self.data_source.val_dl)
 
     @property
     def is_training_done(self) -> bool:

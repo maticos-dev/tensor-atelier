@@ -7,7 +7,7 @@
   
   [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
   [![PyTorch](https://img.shields.io/badge/PyTorch-1.12+-red.svg)](https://pytorch.org/)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 </div>
 
 ---
@@ -77,7 +77,7 @@ class MyModel(AtelierModule):
 trainer = AtelierTrainer(
     max_epochs=10,
     accelerator="cpu",  # or "cuda", "mps"
-    profiler=BaseProfiler()  # optional
+    profiler=AtelierBaseProfiler()  # optional
 )
 ```
 
@@ -97,15 +97,15 @@ dataloader = AtelierDataLoader(
 Create custom profilers to monitor your training:
 
 ```python
-from tensoratelier.profilers import BaseProfiler
+from tensoratelier.profilers import AtelierBaseProfiler
 import time
 
-class TimeProfiler(BaseProfiler):
+class TimeProfiler(AtelierBaseProfiler):
     def start(self, desc, **kwargs):
-        self._active_profiles[desc] = time.perf_counter()
+        self.active_profiles[desc] = time.perf_counter()
     
     def stop(self, desc, context, **kwargs):
-        elapsed = time.perf_counter() - self._active_profiles[desc]
+        elapsed = time.perf_counter() - self.active_profiles[desc]
         print(f"{desc}: {elapsed:.4f}s")
 
 # Use it
@@ -123,32 +123,12 @@ trainer = AtelierTrainer(
 git clone https://github.com/tensor-atelier/tensor-atelier.git
 cd tensor-atelier
 pip install -e .
-
-# With development dependencies
-pip install -e ".[dev]"
 ```
 
 ## 📚 Examples
 
 - **[Basic Training](examples/simple_training.py)** - Simple linear model training
 - **[Custom Profiler](examples/custom_profiler.py)** - Implementing a custom profiler
-
-## 🛠️ Development
-
-```bash
-# Run tests
-pytest
-
-# Format code
-black src/
-isort src/
-
-# Type checking
-mypy src/
-
-# Linting
-flake8 src/
-```
 
 ## 🎨 Design Philosophy
 
@@ -159,7 +139,6 @@ flake8 src/
 
 ## 🔮 Roadmap
 
-- [ ] Validation loop support
 - [ ] Model checkpointing
 - [ ] Learning rate scheduling
 - [ ] Multi-GPU support
@@ -178,8 +157,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
+Apache License 2.0 - see [LICENSE](LICENSE) for details.
 ---
 
 <div align="center">

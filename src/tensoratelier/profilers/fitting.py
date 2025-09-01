@@ -3,12 +3,12 @@ from contextlib import contextmanager
 from typing import Any
 from typing_extensions import override
 
-from tensoratelier.profilers import BaseProfiler, ProfilerContext
+from tensoratelier.profilers import AtelierBaseProfiler, ProfilerContext
 
 log = logging.getLogger(__name__)
 
 
-class _DefaultFittingProfiler(BaseProfiler):
+class _DefaultFittingProfiler(AtelierBaseProfiler):
 
     def __init__(self):
         super().__init__()

@@ -8,7 +8,7 @@ from torch import Tensor
 
 from tensoratelier.loops import _FitLoop, _TrainingEpochLoop
 from tensoratelier.profilers import (
-    BaseProfiler,
+    AtelierBaseProfiler,
     _DefaultFittingProfiler,
     _OptimizationProfiler,
 )
@@ -27,7 +27,7 @@ class AtelierTrainer:
         *,
         max_epochs: int = 10,
         accelerator: Union[str, torch.device],
-        profiler: BaseProfiler = _DefaultFittingProfiler(),
+        profiler: AtelierBaseProfiler = _DefaultFittingProfiler(),
     ) -> None:
         self.max_epochs = max_epochs
         # Import here to avoid circular imports
@@ -156,16 +156,16 @@ class AtelierTrainer:
         return self.atelier_module.optimizer
 
     @property
-    def train_profiler(self) -> BaseProfiler:
+    def train_profiler(self) -> AtelierBaseProfiler:
         if not hasattr(self, "_train_profiler"):
             raise AttributeError("No training profiler linked to trainer object.")
         return self._train_profiler
 
     @train_profiler.setter
-    def train_profiler(self, profiler_obj: BaseProfiler) -> None:
-        if not isinstance(profiler_obj, BaseProfiler):
+    def train_profiler(self, profiler_obj: AtelierBaseProfiler) -> None:
+        if not isinstance(profiler_obj, AtelierBaseProfiler):
             raise TypeError(
-                f"Expected profiler instance to be of type BaseProfiler, but got {profiler_obj.__class__.__qualname__}"
+                f"Expected profiler instance to be of type AtelierBaseProfiler, but got {profiler_obj.__class__.__qualname__}"
             )
 
         log.debug(f"Attached {profiler_obj.__class__.__qualname__} to trainer")
@@ -173,18 +173,18 @@ class AtelierTrainer:
         self._train_profiler = profiler_obj  # instantiate
 
     @property
-    def optimization_profiler(self) -> BaseProfiler:
+    def optimization_profiler(self) -> AtelierBaseProfiler:
         if not hasattr(self, "_optim_profiler"):
             raise AttributeError("No optimization profiler linked to trainer object.")
         return self._optim_profiler
 
     @optimization_profiler.setter
     def optimization_profiler(
-        self, profiler_obj: BaseProfiler
-    ) -> Optional[BaseProfiler]:
-        if not isinstance(profiler_obj, BaseProfiler):
+        self, profiler_obj: AtelierBaseProfiler
+    ) -> Optional[AtelierBaseProfiler]:
+        if not isinstance(profiler_obj, AtelierBaseProfiler):
             raise TypeError(
-                f"Expected profiler instance to be of type BaseProfiler, but got {profiler_obj.__class__.__qualname__}"
+                f"Expected profiler instance to be of type AtelierBaseProfiler, but got {profiler_obj.__class__.__qualname__}"
             )
 
         log.debug(f"Attached {profiler_obj.__class__.__qualname__} to trainer")

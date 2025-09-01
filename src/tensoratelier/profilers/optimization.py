@@ -2,12 +2,12 @@ import logging
 from contextlib import contextmanager
 from typing_extensions import override
 
-from tensoratelier.profilers import BaseProfiler
+from tensoratelier.profilers import AtelierBaseProfiler
 
 log = logging.getLogger(__name__)
 
 
-class _OptimizationProfiler(BaseProfiler):
+class _OptimizationProfiler(AtelierBaseProfiler):
     optimization_policy: str = "dormant"
     step_idx: int = -1
 

@@ -11,10 +11,10 @@ def test_profiler_syntax():
     """Test that the profiler classes can be imported and used."""
     try:
         # Import the profiler module directly
-        from tensoratelier.profilers.profiler import BaseProfiler, ProfilerContext
+        from tensoratelier.profilers.profiler import AtelierBaseProfiler, ProfilerContext
         
         # Test creating a simple profiler
-        class TestProfiler(BaseProfiler):
+        class TestProfiler(AtelierBaseProfiler):
             def __init__(self):
                 super().__init__()
                 self.timings = {}
@@ -22,14 +22,14 @@ def test_profiler_syntax():
             def start(self, desc: str, **kwargs):
                 if desc not in self.timings:
                     self.timings[desc] = []
-                self._active_profiles[desc] = time.perf_counter()
+                self.active_profiles[desc] = time.perf_counter()
             
             def stop(self, desc: str, context, **kwargs):
-                if desc in self._active_profiles:
-                    start_time = self._active_profiles[desc]
+                if desc in self.active_profiles:
+                    start_time = self.active_profiles[desc]
                     elapsed = time.perf_counter() - start_time
                     self.timings[desc].append(elapsed)
-                    del self._active_profiles[desc]
+                    del self.active_profiles[desc]
                     print(f"✓ {desc}: {elapsed:.4f}s")
         
         # Test the profiler
