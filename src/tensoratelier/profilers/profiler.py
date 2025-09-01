@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from typing import Any, Dict, Optional, Union
 
 
-class BaseProfiler(ABC):
+class AtelierBaseProfiler(ABC):
     """All user implementations of profilers.
     Must make user of this"""
 
@@ -15,7 +15,7 @@ class BaseProfiler(ABC):
             **kwargs: User-defined configuration options.
         """
         self.config = config
-        self._active_profiles: Dict[str, Any] = {}
+        self.active_profiles: Dict[str, Any] = {}
 
     @abstractmethod
     def start(self, desc: str, **kwargs: Any) -> None:
@@ -27,22 +27,22 @@ class BaseProfiler(ABC):
 
     def profile(self, desc: str, **kwargs):
         # atelier doesnt worry about passing kwargs.
-        # they are saved in baseprofiler at instantiation.
+        # they are saved in AtelierBaseProfiler at instantiation.
         return ProfilerContext(self, desc, **kwargs)
 
     def get_stats(self) -> Dict[str, Any]:
         return {}
 
     def reset(self) -> None:
-        self._active_profiles.clear()
+        self.active_profiles.clear()
 
 
 class ProfilerContext:
 
-    def __init__(self, profiler: BaseProfiler,
+    def __init__(self, profiler: AtelierBaseProfiler,
                  desc: str, **kwargs: Any):
 
-        assert(isinstance(profiler, BaseProfiler))
+        assert(isinstance(profiler, AtelierBaseProfiler))
         self.profiler = profiler 
 
         self.kwargs = kwargs

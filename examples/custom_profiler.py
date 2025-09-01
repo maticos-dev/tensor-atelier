@@ -1,4 +1,4 @@
-from tensoratelier.profilers import BaseProfiler
+from tensoratelier.profilers import AtelierBaseProfiler
 import torch
 from tensoratelier import AtelierModule, AtelierTrainer
 import torch.nn as nn
@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 from torch.utils.data import DataLoader, TensorDataset
 
 
-class SimpleTimeProfiler(BaseProfiler):
+class SimpleTimeProfiler(AtelierBaseProfiler):
     """Simple timer-based profiler."""
 
     def __init__(self, print_results: bool = True, **kwargs: Any):
@@ -20,15 +20,15 @@ class SimpleTimeProfiler(BaseProfiler):
         start_time = time.perf_counter()
         if desc not in self.timings:
             self.timings[desc] = []
-        self._active_profiles[desc] = start_time
+        self.active_profiles[desc] = start_time
 
     def stop(self, desc: str, context: Any, **kwargs: Any) -> None:
         """Records elapsed time."""
-        if desc in self._active_profiles:
-            start_time = self._active_profiles[desc]
+        if desc in self.active_profiles:
+            start_time = self.active_profiles[desc]
             elapsed = time.perf_counter() - start_time
             self.timings[desc].append(elapsed)
-            del self._active_profiles[desc]
+            del self.active_profiles[desc]
 
             if self.print_results:
                 print(f"{desc}: {elapsed:.4f}s")
@@ -66,7 +66,6 @@ class SimpleLinearModel(AtelierModule):
 
 
 def create_dummy_data(num_samples: int = 1000, input_size: int = 10):
-    # Generate random input data
     x = torch.randn(num_samples, input_size)
 
     weights = torch.randn(input_size, 1)
@@ -79,22 +78,18 @@ def main():
     print("Tensor Atelier - Custom Profiler Example")
     print("=" * 50)
     
-    # Create custom profiler
     profiler = SimpleTimeProfiler(print_results=True)
     
-    # Create data
     x, y = create_dummy_data(1000, 10)
     dataset = TensorDataset(x, y)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-    # Create trainer with custom profiler
     trainer = AtelierTrainer(
         max_epochs=5, 
         accelerator="cpu", 
         profiler=profiler
     )
     
-    # Create model
     module = SimpleLinearModel()
 
     print("Starting training with custom profiler...")
@@ -112,7 +107,6 @@ def main():
         print(f"    Min time: {stat['min_time']:.4f}s")
         print(f"    Max time: {stat['max_time']:.4f}s")
 
-    # Test model
     module.eval()
     with torch.no_grad():
         test_x = torch.randn(10, 10)
