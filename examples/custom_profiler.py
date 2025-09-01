@@ -15,20 +15,37 @@ class SimpleTimeProfiler(BaseProfiler):
         self.print_results = print_results
         self.timings: Dict[str, list] = {}
 
-    def start(self, desc: str, **kwargs: Any) -> float:
-        """Returns start time."""
+    def start(self, desc: str, **kwargs: Any) -> None:
+        """Starts timing for the given description."""
         start_time = time.perf_counter()
         if desc not in self.timings:
             self.timings[desc] = []
-        return start_time
+        self._active_profiles[desc] = start_time
 
-    def stop(self, desc: str, context: float, **kwargs: Any) -> None:
+    def stop(self, desc: str, context: Any, **kwargs: Any) -> None:
         """Records elapsed time."""
-        elapsed = time.perf_counter() - context
-        self.timings[desc].append(elapsed)
+        if desc in self._active_profiles:
+            start_time = self._active_profiles[desc]
+            elapsed = time.perf_counter() - start_time
+            self.timings[desc].append(elapsed)
+            del self._active_profiles[desc]
 
-        if self.print_results:
-            print(f"{desc}: {elapsed:.4f}s")
+            if self.print_results:
+                print(f"{desc}: {elapsed:.4f}s")
+
+    def get_stats(self) -> Dict[str, Any]:
+        """Return timing statistics."""
+        stats = {}
+        for desc, times in self.timings.items():
+            if times:
+                stats[desc] = {
+                    'count': len(times),
+                    'total_time': sum(times),
+                    'avg_time': sum(times) / len(times),
+                    'min_time': min(times),
+                    'max_time': max(times)
+                }
+        return stats
 
 
 class SimpleLinearModel(AtelierModule):
@@ -59,21 +76,48 @@ def create_dummy_data(num_samples: int = 1000, input_size: int = 10):
 
 
 def main():
+    print("Tensor Atelier - Custom Profiler Example")
+    print("=" * 50)
+    
+    # Create custom profiler
+    profiler = SimpleTimeProfiler(print_results=True)
+    
+    # Create data
     x, y = create_dummy_data(1000, 10)
-    trainer = AtelierTrainer(
-        max_epochs=5, accelerator="cpu", profiler=SimpleTimeProfiler())
-    module = SimpleLinearModel()
-
     dataset = TensorDataset(x, y)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
+    # Create trainer with custom profiler
+    trainer = AtelierTrainer(
+        max_epochs=5, 
+        accelerator="cpu", 
+        profiler=profiler
+    )
+    
+    # Create model
+    module = SimpleLinearModel()
+
+    print("Starting training with custom profiler...")
     trainer.fit(module, dataloader)
 
+    # Print final statistics
+    print("\nTraining completed!")
+    print("Profiling statistics:")
+    stats = profiler.get_stats()
+    for desc, stat in stats.items():
+        print(f"  {desc}:")
+        print(f"    Count: {stat['count']}")
+        print(f"    Total time: {stat['total_time']:.4f}s")
+        print(f"    Average time: {stat['avg_time']:.4f}s")
+        print(f"    Min time: {stat['min_time']:.4f}s")
+        print(f"    Max time: {stat['max_time']:.4f}s")
+
+    # Test model
     module.eval()
     with torch.no_grad():
         test_x = torch.randn(10, 10)
         test_y = module.linear(test_x)
-        print(f"Test output shape: {test_y.shape}")
+        print(f"\nTest output shape: {test_y.shape}")
         print(f"Sample predictions: {test_y[:3].flatten()}")
 
 

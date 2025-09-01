@@ -5,19 +5,15 @@ from typing import Any, Dict, Optional, Union
 
 
 class BaseProfiler(ABC):
-    """
-    All user implementations of profilers.
-    Must make user of this
-    """
+    """All user implementations of profilers.
+    Must make user of this"""
 
     def __init__(self, **kwargs: Any):
-        """ Initialize profiler with custom kwargs.
+        """Initialize profiler with custom kwargs.
 
         Args:
             **kwargs: User-defined configuration options.
-
         """
-
         self.config = kwargs
         self._active_profiles: Dict[str, Any] = {}
 
@@ -29,8 +25,7 @@ class BaseProfiler(ABC):
     def stop(self, desc: str, context: Any, **kwargs: Any) -> None:
         pass
 
-    @contextmanager
-    def profile(self, desc: str) -> Generator:
+    def profile(self, desc: str):
         # atelier doesnt worry about passing kwargs.
         # they are saved in baseprofiler at instantiation.
         return ProfilerContext(self, desc, **self.config)

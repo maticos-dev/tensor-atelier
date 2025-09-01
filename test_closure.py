@@ -28,11 +28,11 @@ class MLP(AtelierModule):
 		return self.configure_optimizers()
 
 def create_dummy_data(num_samples: int = 1000, input_size: int = 10):
-	    x = torch.randn(num_samples, input_size)
-	    weights = torch.randn(input_size, 1)
-	    y = x @ weights + torch.randn(num_samples, 1) * 0.1
-		
-	    return x, y
+	x = torch.randn(num_samples, input_size)
+	weights = torch.randn(input_size, 1)
+	y = x @ weights + torch.randn(num_samples, 1) * 0.1
+
+	return x, y
 
 model = MLP()
 
@@ -42,6 +42,5 @@ x, y = create_dummy_data(num_samples=1000, input_size=10)
 dataset = TensorDataset(x, y)
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
-# autoopt = _AutomaticOptimization(trainer, model.optimizer)
 
 trainer.fit(model, dataloader)

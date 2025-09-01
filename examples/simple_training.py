@@ -1,9 +1,7 @@
-"""
-This example demonstrates how to:
+"""This example demonstrates how to:
 1. Create a simple model inheriting from AtelierModule
 2. Set up a trainer with profiling
-3. Train the model with automatic optimization
-"""
+3. Train the model with automatic optimization"""
 
 import torch
 import torch.nn as nn

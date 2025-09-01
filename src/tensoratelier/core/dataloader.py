@@ -101,7 +101,11 @@ class AtelierDataLoader:
         dataset = self.train_dl if self._mode == "train" else self.val_dl
 
         self._check_if_trainer_linked()
-        with self._trainer.train_profiler.profile(self._mode, self.batch_idx):
+
+        # add batch index to profiler configuration.
+        self._trainer.train_profiler.config["batch_idx"] = self.batch_idx
+
+        with self._trainer.train_profiler.profile(self._mode):
             for batch in dataset:
                 self.batch_idx += 1
                 # Move each tensor in the batch to the device
@@ -143,7 +147,6 @@ class AtelierDataLoader:
             self._trainer = trainer
         else:
             raise AttributeError(
-                f"Expected trainer to be instance of {
-                    AtelierTrainer.__qualname__} "
+                f"Expected trainer to be instance of {AtelierTrainer.__qualname__} "
                 f"but got {trainer.__class__.__qualname__} object."
             )

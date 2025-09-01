@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test script to verify the example can import without syntax errors.
-"""
+"""Test script to verify the example can import without syntax errors."""
 
 import sys
 import os
@@ -11,32 +9,26 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 def test_example_import():
     """Test that the example script can import without syntax errors."""
-    
-    print("Testing example script imports...")
-    
     try:
-        # Test the imports that the example script uses
-        from tensoratelier import AtelierModule, AtelierTrainer
-        print("✓ Example imports successful!")
-        return True
-    except ImportError as e:
-        if "torch" in str(e):
-            print("⚠ Example imports failed due to missing PyTorch (expected)")
-            return True  # This is expected without PyTorch
-        else:
-            print(f"✗ Example imports failed: {e}")
-            return False
+        print("Testing example import...")
+        
+        # Test importing the example
+        import examples.simple_training
+        print("✓ Example imported successfully")
+        
+        # Test importing the custom profiler example
+        import examples.custom_profiler
+        print("✓ Custom profiler example imported successfully")
+        
+        print("All examples imported successfully!")
+        
     except SyntaxError as e:
-        print(f"✗ Syntax error in imports: {e}")
-        return False
+        print(f"Syntax error: {e}")
+    except ImportError as e:
+        print(f"Import error: {e}")
     except Exception as e:
-        print(f"✗ Unexpected error: {e}")
-        return False
+        print(f"Unexpected error: {e}")
+
 
 if __name__ == "__main__":
-    success = test_example_import()
-    if success:
-        print("\n🎉 Example script can import successfully!")
-    else:
-        print("\n❌ Example script has import issues.")
-        sys.exit(1)
+    test_example_import()

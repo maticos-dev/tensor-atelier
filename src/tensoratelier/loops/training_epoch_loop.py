@@ -1,7 +1,7 @@
 from torch import Tensor
 from typing import Optional
 from tensoratelier.loops.optimization import _AutomaticOptimization, _StatefulBase
-from tensoratelier.loops.progress import _BatchProgress, _OptimizationProgress
+from tensoratelier.loops.progress import _BatchProgress, _OptimizationProgress, _EpochProgress
 
 
 class _TrainingEpochLoop(_StatefulBase):
@@ -14,18 +14,17 @@ class _TrainingEpochLoop(_StatefulBase):
             trainer, self.trainer.atelier_optimizer
         )
 
-        self._epoch_progress = self.trainer.epoch_progress
+        # Create our own epoch progress instead of depending on trainer.epoch_progress
+        self._epoch_progress = _EpochProgress()
         self._optim_progress = _OptimizationProgress()
         self._batch_progress = _BatchProgress()
 
     def run(self, dataloader):
-        """
-        Called once for each epoch. Only retrieve epoch once.
+        """Called once for each epoch. Only retrieve epoch once.
         Batches are not fixed, need to iteratively call
-        batch progress.
-        """
+        batch progress."""
 
-        epoch_idx = self.epoch_progress.epoch_idx
+        epoch_idx = self._epoch_progress.epoch_idx
 
         self._update_current_state(epoch_idx, batch_idx=0)
 
