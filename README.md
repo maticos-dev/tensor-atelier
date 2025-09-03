@@ -18,12 +18,11 @@ Tensor Atelier is a clean, modular PyTorch training framework designed for devel
 
 ## ✨ Key Features
 
-- **🔄 Automatic Optimization** - Handles gradients, optimization steps, and scheduling automatically
+- **🔄 Automatic Optimization** - Handles gradients, backprop, and optimization steps automatically
 - **📊 Built-in Profiling** - Monitor training performance with custom profiler support  
 - **⚡ Multi-Accelerator** - CPU, GPU, and custom accelerator support
 - **🧩 Modular Design** - Clean separation of concerns with extensible components
 - **📦 Smart DataLoader** - Automatic device placement and train/validation splitting
-- **🎨 Type Safe** - Full type hints and mypy support
 
 ## 🚀 Quick Start
 
